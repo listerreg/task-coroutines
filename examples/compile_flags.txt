@@ -1,0 +1,5 @@
+-xc++
+-lstdc++
+-std=c++14
+-Icompletion_port/include
+-I../include
