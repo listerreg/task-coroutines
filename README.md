@@ -187,7 +187,7 @@ The simplest way to play with this project is to navigate to the [examples/](exa
 
 ```bash
 $ git clone https://github.com/listerreg/task-coroutines.git
-$ cd coroutines/examples
+$ cd task-coroutines/examples
 $ vi main.cpp
 $ make
 ```
@@ -198,7 +198,7 @@ To compile only the _coroutines_ shared library (without the _completion port_ f
 
 ```bash
 $ git clone https://github.com/listerreg/task-coroutines.git
-$ cd coroutines
+$ cd task-coroutines
 $ make
 ```
 
