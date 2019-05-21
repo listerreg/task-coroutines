@@ -186,7 +186,7 @@ $ make CXX=/usr/bin/g++-7
 The simplest way to play with this project is to navigate to the [examples/](examples/) directory, fiddle with the [main.cpp](examples/main.cpp) file and type `make` in the terminal.
 
 ```bash
-$ git clone TODO address
+$ git clone https://github.com/listerreg/task-coroutines.git
 $ cd coroutines/examples
 $ vi main.cpp
 $ make
@@ -197,7 +197,7 @@ This will produce an executable called `sample` in the current directory. It wil
 To compile only the _coroutines_ shared library (without the _completion port_ fake-framework) type `make` in the root directory of the project.
 
 ```bash
-$ git clone TODO address
+$ git clone https://github.com/listerreg/task-coroutines.git
 $ cd coroutines
 $ make
 ```
