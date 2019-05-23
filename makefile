@@ -5,6 +5,19 @@ CXX := g++
 else
 CXX := clang++
 endif
+noldconfig := $(shell ldconfig --version 2>/dev/null 1>&2; echo $$?)
+ifeq ($(noldconfig), 0)
+SYMLINK_COMMAND = ldconfig -l $(binarydir)/$(OUT_FILE)
+else
+noldconfig := $(shell /sbin/ldconfig --version 2>/dev/null 1>&2; echo $$?)
+ifeq ($(noldconfig), 0)
+SYMLINK_COMMAND = /sbin/ldconfig -l $(binarydir)/$(OUT_FILE)
+endif
+endif
+ifeq ($(SYMLINK_COMMAND),)
+SYMLINK_COMMAND = ln -s $(OUT_FILE) $(binarydir)/$(SONAME)
+endif
+
 
 CXXFLAGS := -std=c++14 -Wall -Wextra -Wpedantic -fPIC
 
@@ -36,9 +49,13 @@ vpath %.o $(objectdir)
 vpath %.cpp $(sourcedir)
 vpath %.s $(sourcedir)
 vpath $(OUT_FILE) $(binarydir)
+vpath $(SONAME) $(binarydir)
+
+$(SONAME) : $(OUT_FILE)
+	$(SYMLINK_COMMAND)
 
 $(OUT_FILE) : $(OBJECTS) | $(binarydir)
-	$(CXX) --shared -Wl,-soname=$(SONAME),--no-undefined $(objects_fullpath) -o $(binarydir)/$@ && ldconfig -l $(binarydir)/$(OUT_FILE)
+	$(CXX) --shared -Wl,-soname=$(SONAME),--no-undefined $(objects_fullpath) -o $(binarydir)/$@
 
 # The order in which pattern rules appear in the makefile is important since this is the order in which they are considered. Of equally applicable rules, only the first one found is used. The rules you write take precedence over those that are built in. Note however, that a rule whose prerequisites actually exist or are mentioned always takes priority over a rule with prerequisites that must be made by chaining other implicit rules !!!
 %.o : %.cpp # cancel the built-in rule
@@ -58,7 +75,7 @@ $(DEPDIR)/%.d: ;
 # Mark the dependency files precious to make, so they won’t be automatically deleted as intermediate files (despite that there's actually an empty recipe for them so make doesn't make them)
 # https://www.gnu.org/software/make/manual/html_node/Chained-Rules.html
 
-debug: $(OUT_FILE)
+debug: $(SONAME)
 
 # target specific variable (in effect for the target and for all of its prerequisites, and all their prerequisites)
 debug: CXXFLAGS += -g
