@@ -49,6 +49,7 @@ public:
 	}
 	~MyClass() {
 		//std::cout << "MyClass DTOR" << std::endl;
+		mArg = 0;
 	}
 private:
 	int mArg;
@@ -144,7 +145,7 @@ int main() {
 	PRINT_THREAD
 
 ///	std::shared_ptr<Task<char>> nextTask = coroTask->continueWith<char>([](Task<int>& task){ std::cout << "result from the inside of the continueWith: " << task.getResult() << ". Now we will throw from the inside..." << std::endl; throw std::runtime_error("ERROR FROM INSIDE"); return 'B'; });
-	std::shared_ptr<Task<char>> nextTask = coroTask->continueWith<char>([](Task<MyClass>& task){
+	std::shared_ptr<Task<MyClass>> nextTask = coroTask->continueWith<MyClass>([](Task<MyClass>& task){
 		std::cout << "we're in the continuation. wait()-ing for the task..." << std::endl;
 		PRINT_THREAD
 		try {
@@ -153,7 +154,7 @@ int main() {
 			std::cout << "we've caught an exception: " << ex.what() << std::endl;
 		}
 		std::cout << " ...leaving continuation" << std::endl;
-		return 'A';
+		return MyClass{42};
 	});
 
 	try {

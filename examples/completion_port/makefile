@@ -5,8 +5,11 @@ CXX := g++
 else
 CXX := clang++
 endif
+ifndef STD
+STD := c++14
+endif
 
-CXXFLAGS := -std=c++14 -Wall -Wextra -Wpedantic -fPIC
+CXXFLAGS := -std=$(STD) -Wall -Wextra -Wpedantic -fPIC
 OUT_FILE := libcompletionport.a
 DNDEBUG_ = -DNDEBUG #trailing space
 

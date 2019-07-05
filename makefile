@@ -17,9 +17,11 @@ endif
 ifeq ($(SYMLINK_COMMAND),)
 SYMLINK_COMMAND = ln -s $(OUT_FILE) $(binarydir)/$(SONAME)
 endif
+ifndef STD
+STD := c++14
+endif
 
-
-CXXFLAGS := -std=c++14 -Wall -Wextra -Wpedantic -fPIC
+CXXFLAGS := -std=$(STD) -Wall -Wextra -Wpedantic -fPIC
 
 includedir := include
 sourcedir := src
@@ -80,7 +82,7 @@ debug: $(SONAME)
 # target specific variable (in effect for the target and for all of its prerequisites, and all their prerequisites)
 debug: CXXFLAGS += -g
 debug: DEBUGFLAG = -g
-debug: DNDEBUG_ =
+debug: DNDEBUG_ =# clears the -DNDEBUG flag
 
 .PHONY: clean
 clean:

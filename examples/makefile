@@ -5,8 +5,11 @@ CXX := g++
 else
 CXX := clang++
 endif
+ifndef STD
+STD := c++14
+endif
 
-CXXFLAGS := -std=c++14 -Wall -Wextra -Wpedantic -fPIC
+CXXFLAGS := -std=$(STD) -Wall -Wextra -Wpedantic -fPIC
 DNDEBUG_ = -DNDEBUG #trailing space
 
 #watch for the double dollar sign ($$) and the single quotes around the $ORIGIN

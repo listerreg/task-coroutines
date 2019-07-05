@@ -2,7 +2,12 @@
 #define AW_TASKCORO_H
 
 #include <condition_variable>
+#include <functional>
 #include "common.h"
+
+#if __cpp_lib_optional >= 201603
+#include <optional>
+#endif
 
 extern "C" void sink_asm(void*);
 extern "C" int saveandswitch_asm(void*);
@@ -23,7 +28,7 @@ protected:
 	T* mResult = reinterpret_cast<T*>(resultPlaceholder);
 	bool hasResult = false;
 private:
-	alignas(T) char resultPlaceholder[sizeof(T)]; // in C++17 use std::optional
+	alignas(T) char resultPlaceholder[sizeof(T)]; // we use this insted of the std::optional beacause we want a stable address of a result that the mResult holds
 };
 
 template <class T>
@@ -330,7 +335,16 @@ AwaiterCallbackContinueWith<TPrevTask, TResult>::AwaiterCallbackContinueWith(TPr
 
 template<class TPrevTask, class TResult>
 void AwaiterCallbackContinueWith<TPrevTask, TResult>::operator()() {
-	//std::optional<TResult> result; // with C++17 we could use optional to achieve below
+#if __cpp_lib_optional >= 201603
+	std::optional<TResult> result;
+	try {
+		result = mFunc(mPrevTask);
+	} catch (std::exception& ex) {
+		mNextTask->setException(ex);
+		return;
+	}
+	mNextTask->setResult(result.value());
+#else
 	alignas(TResult) char result[sizeof(TResult)]; // we cannot write TResult result; because it could not have the default ctor and...
 	try {
 		new (result) TResult(mFunc(mPrevTask)); // we need to distinguish if an exception was thrown by the continueWith callback or by the Task::setResult(). In the later case we want to let the exception freely propagate
@@ -338,8 +352,9 @@ void AwaiterCallbackContinueWith<TPrevTask, TResult>::operator()() {
 		mNextTask->setException(ex);
 		return;
 	}
-	reinterpret_cast<TResult*>(result)->~TResult();
 	mNextTask->setResult(*reinterpret_cast<TResult*>(result));
+	reinterpret_cast<TResult*>(result)->~TResult(); // standard: The notation for explicit call of a destructor can be used for any scalar type name. Allowing this makes it possible to write code without having to know if a destructor exists for a given type.
+#endif
 }
 }
 #endif
