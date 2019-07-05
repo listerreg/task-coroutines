@@ -1,5 +1,9 @@
+#ifndef AW_TASKCOROCOMMON_H
+#define AW_TASKCOROCOMMON_H
+
 #include <mutex>
 #include <memory>
+#include "coro-concepts.h"
 
 namespace aw_coroutines {
 void copyNestedExceptionInfo(char*, const std::exception&, size_t, bool = true);
@@ -35,10 +39,16 @@ protected:
 	char mExcWhats[256];
 	bool mError = false;
 
+#if __cpp_concepts >= 201507
+template <NonReference TInput, NonReference TResult>
+	requires CopyConstructible<TInput> && CopyConstructible<TResult>
+#else
 template <class TInput, class TResult>
+#endif
 friend class Caller;
 
 template <class TTask, class TResult>
 friend class AwaiterCallbackUnsink;
 };
 }
+#endif

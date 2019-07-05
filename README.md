@@ -113,8 +113,14 @@ ArbitraryResultType result = task1->getResult();
 
 ### Constraints on the coroutine signature
 A coroutine is just a plain function except for the following restrictions:
- 1. An argument passed to a coroutine cannot be of the _reference type_,
+ 1. An argument passed to a coroutine and its return value cannot be of the _reference type_ and must be _copy constructible_,
  2. At the moment a coroutine has to take and return something.
+
+> **NOTE:** If a compiler supports it it is possible to pass the `CONCEPTS` flag to the `make` to force the first constraint.
+
+```bash
+$ make CONCEPTS=yes
+```
 
 ## Invoking a coroutine
 In order to invoke a coroutine a `Caller` object is needed. Its constructor takes a function pointer to the coroutine.
@@ -180,7 +186,13 @@ system which uses the ELF file format.
 To compile this project a compiler with the C++14 support is needed. The included makefile will use g++ or clang++ whichever is available. You can override this by setting the CXX to the desired compiler at the command line.
 
 ```bash
-$ make CXX=/usr/bin/g++-7
+$ make CXX=/usr/bin/g++-9.1
+```
+
+It is possible to set a STD variable to `c++17` or higher to make use of some C++17 features like the `std::optional` if the compiler supports them.
+
+```bash
+$ make STD=c++17
 ```
 
 The simplest way to play with this project is to navigate to the [examples/](examples/) directory, fiddle with the [main.cpp](examples/main.cpp) file and type `make` in the terminal.

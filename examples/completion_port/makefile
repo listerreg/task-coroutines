@@ -8,8 +8,11 @@ endif
 ifndef STD
 STD := c++14
 endif
+ifdef CONCEPTS
+CONCEPT := -fconcepts
+endif
 
-CXXFLAGS := -std=$(STD) -Wall -Wextra -Wpedantic -fPIC
+CXXFLAGS := -std=$(STD) -Wall -Wextra -Wpedantic -fPIC $(CONCEPT)
 OUT_FILE := libcompletionport.a
 DNDEBUG_ = -DNDEBUG #trailing space
 

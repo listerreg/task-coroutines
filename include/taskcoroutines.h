@@ -4,6 +4,7 @@
 #include <condition_variable>
 #include <functional>
 #include "common.h"
+#include "coro-concepts.h"
 
 #if __cpp_lib_optional >= 201603
 #include <optional>
@@ -79,7 +80,12 @@ struct WholeState {
 	bool isCaught = false;
 };
 
+#if __cpp_concepts >= 201507
+template <NonReference TInput, NonReference TResult>
+	requires CopyConstructible<TInput> && CopyConstructible<TResult>
+#else
 template <class TInput, class TResult>
+#endif
 class Caller {
 public:
 	Caller(TResult (*)(Caller, TInput));
@@ -204,10 +210,20 @@ void Task<T>::wait() {
 		throw Coroutine_error(what);
 }
 
+#if __cpp_concepts >= 201507
+template <NonReference TInput, NonReference TResult>
+	requires CopyConstructible<TInput> && CopyConstructible<TResult>
+#else
 template <class TInput, class TResult>
+#endif
 Caller<TInput, TResult>::Caller(TResult (*f)(Caller, TInput)): mRoutine(f){}
 
+#if __cpp_concepts >= 201507
+template <NonReference TInput, NonReference TResult>
+	requires CopyConstructible<TInput> && CopyConstructible<TResult>
+#else
 template <class TInput, class TResult>
+#endif
 std::shared_ptr<Task<TResult>> Caller<TInput, TResult>::operator()(TInput arg) {
 	mWholeState = std::make_shared<WholeState<TResult>>();
 	WholeState<TResult> *fromSink = firstLevel(&arg);
@@ -229,7 +245,12 @@ std::shared_ptr<Task<TResult>> Caller<TInput, TResult>::operator()(TInput arg) {
 }
 
 // return address of this routine will be replaced by the saveandswitch_asm() and it'll point to cleanup_asm(). It will be used when user's routine will end (synchronously or asynchronously)
+#if __cpp_concepts >= 201507
+template <NonReference TInput, NonReference TResult>
+	requires CopyConstructible<TInput> && CopyConstructible<TResult>
+#else
 template <class TInput, class TResult>
+#endif
 WholeState<TResult> *Caller<TInput, TResult>::firstLevel(TInput *pArg) noexcept {
 	// return from the save_asm will be mimic by all the sink_asm() calls (in that case the returned value is set to true). The stack can be in a various state though
 	// save_asm saves its return address and the RBX, RBP, and the R12–R15 registers and sets the return value to false
@@ -248,7 +269,12 @@ WholeState<TResult> *Caller<TInput, TResult>::firstLevel(TInput *pArg) noexcept 
 	return pWholeState; // this is so the cleanup_asm (synchronous or asynchronous return from the user's routine) has somehow got a reference to the original registers
 }
 
+#if __cpp_concepts >= 201507
+template <NonReference TInput, NonReference TResult>
+	requires CopyConstructible<TInput> && CopyConstructible<TResult>
+#else
 template <class TInput, class TResult>
+#endif
 void Caller<TInput, TResult>::secondLevel(TInput* pArg, WholeState<TResult>* pWholeState) noexcept {
 	std::shared_ptr<Task<TResult>> aspMainTask = std::atomic_load(&pWholeState->mTask); // noexcept; this effectively copies a shared_ptr (increments the use_count)
 	// "To avoid data races, once a shared pointer is passed to any of these functions, it cannot be accessed non-atomically. In particular, you cannot dereference such a shared_ptr without first atomically loading it into another shared_ptr object, and then dereferencing through the second object."
@@ -277,7 +303,12 @@ void Caller<TInput, TResult>::secondLevel(TInput* pArg, WholeState<TResult>* pWh
 	pWholeState->mTaskAwaiter = nullptr; // function as a flag signaling there's no task left
 }
 
+#if __cpp_concepts >= 201507
+template <NonReference TInput, NonReference TResult>
+	requires CopyConstructible<TInput> && CopyConstructible<TResult>
+#else
 template <class TInput, class TResult>
+#endif
 template <typename TInterResult>
 TInterResult Caller<TInput, TResult>::await(Task<TInterResult> &rTask) {
 	TaskAwaiter<TInterResult> *pAwaiter = rTask.getAwaiter();

@@ -8,8 +8,11 @@ endif
 ifndef STD
 STD := c++14
 endif
+ifdef CONCEPTS
+CONCEPT := -fconcepts
+endif
 
-CXXFLAGS := -std=$(STD) -Wall -Wextra -Wpedantic -fPIC
+CXXFLAGS := -std=$(STD) -Wall -Wextra -Wpedantic -fPIC $(CONCEPT)
 DNDEBUG_ = -DNDEBUG #trailing space
 
 #watch for the double dollar sign ($$) and the single quotes around the $ORIGIN
