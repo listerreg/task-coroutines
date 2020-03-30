@@ -29,7 +29,7 @@ int main() {
 ### The coroutine
 
 ```c++
-int usefulCoroutine(Caller<std::string, bool> caller, std::string arg) // the coroutine taking std::string and returning int (both are arbitrary although with some constraints, see later)
+bool usefulCoroutine(Caller<std::string, bool> caller, std::string arg) // the coroutine taking std::string and returning bool (both are arbitrary although with some constraints, see later)
 {
 	// Call some asynchronous I/O function implemented usually as part of other "lower-level" framework
 	std::shared_ptr<Task<std::string>> dbQueryTask = DataBase.queryAsync(arg); // execution doesn't stop here
